@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Rhetos.WindowsAuthImpersonation</id>
+    <version>1.0.0-dev</version>
+    <authors>Omega software</authors>
+    <owners>Omega software</owners>
+    <projectUrl>https://github.com/rhetos/rhetos</projectUrl>
+    <description>WindowsAuthImpersonation is a plugin package for Rhetos development platform.
+      It allows users to log in as another user when using Windows Authentication.</description>
+    <copyright>Copyright Omega software 2015</copyright>
+    <tags>Rhetos plugin</tags>
+    <dependencies>
+      <dependency id="Rhetos.CommonConcepts" version="1.0.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Readme.md" target="" />
+    <file src="Resources\**\*" target="Resources" />
+    <file src="Source\Rhetos.WindowsAuthImpersonation\bin\Debug\Rhetos.WindowsAuthImpersonation.dll" target="lib\net451" />
+    <file src="Source\Rhetos.WindowsAuthImpersonation\bin\Debug\Rhetos.WindowsAuthImpersonation.pdb" target="lib\net451" />
+  </files>
+</package>

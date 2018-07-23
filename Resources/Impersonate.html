@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Rhetos: Impersonate</title>
+        <script type="text/javascript" src="Js/jquery-1.7.min.js" ></script>
+        <script type="text/javascript">
+        $(document).keypress(function(e) {
+            if(e.which == 13) {
+                e.preventDefault();
+                $('#impersonate').click();
+            }
+        });
+
+        $(document).ready(function () {
+                
+            $('#impersonate').click(function() {
+
+                var data = JSON.stringify({ 'ImpersonatedUser': $('#impersonateduser').val() });
+
+                $.ajax({
+                            url: 'Impersonation/Impersonate',
+                            type: 'POST',
+                            dataType: 'json',
+                            async: false,
+                            contentType: 'application/json; charset=utf-8',
+                            data: data,
+                            success: function (data) {
+                                if (data===null)
+									alert('Impersonating ' + $('#impersonateduser').val() + ' successfully.');
+                                else
+                                    alert('Unexpected server response: ' + data.toString());
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                var msg = jqXHR.responseText;
+                                try { msg = JSON.stringify(JSON.parse(msg), null, 2); } catch (e) {}
+                                alert('ERROR: ' + errorThrown + '\n\n' + msg);
+                            }
+                        });
+            });
+         });
+        </script>
+    </head>
+    <body>
+        <h1>Impersonate</h1>
+        <div class="control-group">
+            <label class="control-label" for="impersonateduser">Impersonate user:</label>
+            <div class="controls">
+                <input type="text" id="impersonateduser" name="impersonateduser" />
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <input type="submit" id="impersonate"  name="impersonate" value="Impersonate" />
+            </div>
+        </div>
+    </body>
+</html>
