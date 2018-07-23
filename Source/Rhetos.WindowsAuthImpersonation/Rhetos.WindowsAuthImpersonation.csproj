@@ -79,6 +79,9 @@
     <Reference Include="Rhetos.DatabaseGenerator, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rhetos.1.0.0\lib\net451\Rhetos.DatabaseGenerator.dll</HintPath>
     </Reference>
+    <Reference Include="Rhetos.DatabaseGenerator.DefaultConcepts, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rhetos.CommonConcepts.1.0.0\lib\net451\Rhetos.DatabaseGenerator.DefaultConcepts.dll</HintPath>
+    </Reference>
     <Reference Include="Rhetos.DatabaseGenerator.Interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rhetos.1.0.0\lib\net451\Rhetos.DatabaseGenerator.Interfaces.dll</HintPath>
     </Reference>
@@ -91,11 +94,20 @@
     <Reference Include="Rhetos.Dom, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rhetos.1.0.0\lib\net451\Rhetos.Dom.dll</HintPath>
     </Reference>
+    <Reference Include="Rhetos.Dom.DefaultConcepts, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rhetos.CommonConcepts.1.0.0\lib\net451\Rhetos.Dom.DefaultConcepts.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Dom.DefaultConcepts.Interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rhetos.CommonConcepts.1.0.0\lib\net451\Rhetos.Dom.DefaultConcepts.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Rhetos.Dom.Interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rhetos.1.0.0\lib\net451\Rhetos.Dom.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="Rhetos.Dsl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rhetos.1.0.0\lib\net451\Rhetos.Dsl.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Dsl.DefaultConcepts, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rhetos.CommonConcepts.1.0.0\lib\net451\Rhetos.Dsl.DefaultConcepts.dll</HintPath>
     </Reference>
     <Reference Include="Rhetos.Dsl.Interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rhetos.1.0.0\lib\net451\Rhetos.Dsl.Interfaces.dll</HintPath>
@@ -124,6 +136,12 @@
     <Reference Include="Rhetos.Processing, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rhetos.1.0.0\lib\net451\Rhetos.Processing.dll</HintPath>
     </Reference>
+    <Reference Include="Rhetos.Processing.DefaultCommands, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rhetos.CommonConcepts.1.0.0\lib\net451\Rhetos.Processing.DefaultCommands.dll</HintPath>
+    </Reference>
+    <Reference Include="Rhetos.Processing.DefaultCommands.Interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rhetos.CommonConcepts.1.0.0\lib\net451\Rhetos.Processing.DefaultCommands.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Rhetos.Processing.Interfaces, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rhetos.1.0.0\lib\net451\Rhetos.Processing.Interfaces.dll</HintPath>
     </Reference>
@@ -149,6 +167,7 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -160,10 +179,7 @@
     <Compile Include="ImpersonationUserInfo.cs" />
     <Compile Include="AutofacModuleConfiguration.cs" />
     <Compile Include="HomePageSnippet.cs" />
-    <Compile Include="ImpersonationDatabaseInitializer.cs" />
     <Compile Include="ImpersonationService.cs" />
-    <Compile Include="ImpersonationServiceClaims.cs" />
-    <Compile Include="ImpersonationServiceInitializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -42,13 +42,15 @@ and make sure the NuGet package location is listed in the *RhetosPackageSources.
 
 ### Configuring user's permissions
 
-All claims related to the impersonation service have resource=`WindowsAuthentication.Impersonation`.
-
 The following security claims are used in the impersonation web service:
 
-* `Impersonate` - A user with this claim is allowed to impersonate another user (execute the `Impersonate` web method).
-* `IncreasePermissions` - A user with this claim is allowed to **impersonate another user that has more permissions** than the original user.
+* `WindowsAuthImpersonation.Impersonate` : `Execute`
+  * A user with this claim is allowed to impersonate another user (execute the `Impersonate` web method).
+* `WindowsAuthImpersonation.Impersonate` : `IncreasePermissions`
+  * A user with this claim is allowed to **impersonate another user that has more permissions** than the original user.
   This claim is **not assigned** by default to the admin user.
+* `WindowsAuthImpersonation.StopImpersonating` : `Execute`
+  * Should be added to all used with claim `WindowsAuthImpersonation.Impersonate` `Execute`.
 
 ### Simple administration GUI
 

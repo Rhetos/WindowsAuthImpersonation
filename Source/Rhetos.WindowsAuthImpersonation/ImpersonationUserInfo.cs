@@ -1,5 +1,4 @@
-﻿using Rhetos.AspNetFormsAuth;
-using Rhetos.Security;
+﻿using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
@@ -90,10 +89,7 @@ namespace Rhetos.WindowsAuthImpersonation
 
         private static bool GetIsUserRecognized()
         {
-            return HttpContext.Current != null
-                && HttpContext.Current.User != null
-                && HttpContext.Current.User.Identity != null
-                && HttpContext.Current.User.Identity.IsAuthenticated;
+            return HttpContext.Current?.User?.Identity?.IsAuthenticated == true;
         }
 
         private string GetImpersonatedUser()

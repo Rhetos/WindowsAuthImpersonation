@@ -20,7 +20,7 @@
                 var data = JSON.stringify({ 'ImpersonatedUser': $('#impersonateduser').val() });
 
                 $.ajax({
-                            url: 'Impersonation/Impersonate',
+                            url: '../../rest/WindowsAuthImpersonation/Impersonate/',
                             type: 'POST',
                             dataType: 'json',
                             async: false,

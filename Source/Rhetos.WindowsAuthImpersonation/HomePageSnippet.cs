@@ -17,7 +17,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Rhetos.Extensibility;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
@@ -67,7 +66,7 @@ namespace Rhetos.WindowsAuthImpersonation
 
         public static string GetImpersonatedUser()
         {
-            var formsIdentity = (System.Web.HttpContext.Current.User.Identity as System.Web.Security.FormsIdentity);
+            var formsIdentity = (HttpContext.Current.User.Identity as System.Web.Security.FormsIdentity);
             if (formsIdentity != null && formsIdentity.IsAuthenticated)
             {
                 string userData = formsIdentity.Ticket.UserData;
