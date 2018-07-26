@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
+using Rhetos.WindowsAuthImpersonation.Abstractions;
 
 namespace Rhetos.WindowsAuthImpersonation
 {
@@ -15,6 +16,7 @@ namespace Rhetos.WindowsAuthImpersonation
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().InstancePerLifetimeScope();
             builder.RegisterType<ImpersonationService>().InstancePerLifetimeScope();
 
             Plugins.CheckOverride<IUserInfo, ImpersonationUserInfo>(builder, typeof(WcfWindowsUserInfo));
