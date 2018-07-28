@@ -42,16 +42,23 @@ namespace Rhetos.AspNetFormsAuthImpersonation
     [Export(typeof(Rhetos.IService))]
     public class ImpersonationServiceInitializer : Rhetos.IService
     {
+        private readonly IHttpModule _impersonationTickedExpirationModule;
+
+        public ImpersonationServiceInitializer(Func<ImpersonationService> impersonationServiceFactory, ILogProvider logProvider)
+        {
+            var log = logProvider.GetLogger(GetType().Name);
+            log.Info(() =>"ImpersonationServiceInitializer instantianted. Creating single ImpersonationTicketExpirationModule instance.");
+            _impersonationTickedExpirationModule = new ImpersonationTicketExpirationModule(impersonationServiceFactory, logProvider);
+        }
+
         public void Initialize()
         {
             RouteTable.Routes.Add(new ServiceRoute("Resources/WindowsAuthImpersonation/Impersonation", new ImpersonationServiceHostFactory(), typeof(ImpersonationService)));
         }
 
-        private static IHttpModule _cancelUnauthorizedClientRedirectionModule = new CancelUnauthorizedClientRedirection();
-
         public void InitializeApplicationInstance(HttpApplication context)
         {
-            _cancelUnauthorizedClientRedirectionModule.Init(context);
+            _impersonationTickedExpirationModule.Init(context);
         }
     }
 

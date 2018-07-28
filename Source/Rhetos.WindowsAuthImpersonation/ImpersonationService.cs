@@ -1,4 +1,23 @@
-﻿using Rhetos.Dom.DefaultConcepts;
+﻿/*
+    Copyright (C) 2014 Omega software d.o.o.
+
+    This file is part of Rhetos.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+using Rhetos.Dom.DefaultConcepts;
 using Rhetos.Logging;
 using Rhetos.Security;
 using Rhetos.Utilities;
@@ -35,6 +54,7 @@ namespace Rhetos.WindowsAuthImpersonation
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
     public class ImpersonationService
     {
+        public static readonly TimeSpan TicketTimeout = TimeSpan.FromMinutes(2);
         public static readonly string ImpersonatingUserInfoPrefix = "Impersonating:";
         public static readonly Claim IncreasePermissionsClaim = new Claim("WindowsAuthImpersonation.Impersonate", "IncreasePermissions");
         public static readonly string[] SupportedAuthenticationTypes = {"Negotiate", "Windows", "Kerberos"};
@@ -142,6 +162,42 @@ namespace Rhetos.WindowsAuthImpersonation
             return identity.Name;
         }
 
+        public void SlideExpirationIfValidTicket()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            // if there is already a new value for cookie present, skip the operation
+            if (httpContext.Response.Cookies.AllKeys.Contains(FormsAuthentication.FormsCookieName)) return;
+
+            var ticket = GetExistingTicket();
+            if (ticket == null) return;
+
+            // if ticket has expired, lets do some housekeeping and remove it from cookies
+            if (!IsTicketValid(ticket))
+            {
+                AddResponseCookie(null);
+                return;
+            }
+
+            _logger.Info($"Found valid existing ticket with expiration: {ticket.Expiration.ToString("s")}");
+
+            var ageLeft = ticket.Expiration - DateTime.Now;
+            
+            // do nothing if ticket is either expired or half of timeout has not yet passed
+            if (ageLeft.TotalSeconds < 0 || ageLeft.TotalSeconds > TicketTimeout.TotalSeconds / 2) return;
+
+            _logger.Info($"Cookie age left is {ageLeft.TotalMinutes:#} minutes, refreshing expiration.");
+            var newTicket = new FormsAuthenticationTicket(
+                ticket.Version,
+                ticket.Name,
+                ticket.IssueDate, 
+                DateTime.Now + TicketTimeout,
+                false,
+                ticket.UserData,
+                ticket.CookiePath);
+
+            AddResponseCookie(newTicket);
+        }
+
         #endregion
 
         class TempUserInfo : IUserInfo
@@ -204,16 +260,27 @@ namespace Rhetos.WindowsAuthImpersonation
         {
             var actualUserName = GetActualUserName();
 
-            var httpContext = _httpContextAccessor.HttpContext;
-            var authenticationCookie = httpContext.Request.Cookies[FormsAuthentication.FormsCookieName];
-            if (authenticationCookie != null)
+            var existingTicket = GetExistingTicket();
+            if (existingTicket != null)
             {
-                var decryptedTicked = FormsAuthentication.Decrypt(authenticationCookie.Value);
-                if (IsTicketValid(decryptedTicked)) return decryptedTicked;
+                if (IsTicketValid(existingTicket))
+                {
+                    _logger.Info($"Found valid existing ticket with expiration: {existingTicket.Expiration.ToString("s")}");
+                    return existingTicket;
+                }
             }
 
             // ticket not found or not valid, we will create a fresh one
-            return new FormsAuthenticationTicket(actualUserName, false, 1);
+            return new FormsAuthenticationTicket(2, actualUserName, DateTime.Now, DateTime.Now + TicketTimeout, false, null);
+        }
+
+        private FormsAuthenticationTicket GetExistingTicket()
+        {
+            var authenticationCookie = _httpContextAccessor.HttpContext.Request.Cookies[FormsAuthentication.FormsCookieName];
+            if (string.IsNullOrEmpty(authenticationCookie?.Value)) return null;
+
+            var decryptedTicket = FormsAuthentication.Decrypt(authenticationCookie.Value);
+            return decryptedTicket;
         }
 
         private bool IsTicketValid(FormsAuthenticationTicket authenticationTicket)
@@ -224,6 +291,12 @@ namespace Rhetos.WindowsAuthImpersonation
 
         private void SetImpersonatedUser(string impersonatedUser)
         {
+            if (string.IsNullOrEmpty(impersonatedUser))
+            {
+                AddResponseCookie(null);
+                return;
+            }
+
             var newTicket = new FormsAuthenticationTicket(
                 _authenticationTicket.Value.Version,
                 _authenticationTicket.Value.Name,
@@ -239,10 +312,11 @@ namespace Rhetos.WindowsAuthImpersonation
         private void AddResponseCookie(FormsAuthenticationTicket authenticationTicket)
         {
             var httpContext = _httpContextAccessor.HttpContext;
-            var authenticationCookie = new HttpCookie(FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt(authenticationTicket))
-            {
-                Expires = default(DateTime)
-            };
+
+            var authenticationCookie = authenticationTicket == null
+                ? new HttpCookie(FormsAuthentication.FormsCookieName) { Expires = DateTime.Now.AddYears(-1) } 
+                : new HttpCookie(FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt(authenticationTicket));
+
             httpContext.Response.Cookies.Add(authenticationCookie);
         }
 

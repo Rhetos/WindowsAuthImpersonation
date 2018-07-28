@@ -183,6 +183,7 @@
     <Compile Include="CancelUnauthorizedClientRedirection.cs" />
     <Compile Include="HttpContextAccessor.cs" />
     <Compile Include="ImpersonationServiceInitializer.cs" />
+    <Compile Include="ImpersonationTicketExpirationModule.cs" />
     <Compile Include="ImpersonationUserInfo.cs" />
     <Compile Include="AutofacModuleConfiguration.cs" />
     <Compile Include="HomePageSnippet.cs" />
