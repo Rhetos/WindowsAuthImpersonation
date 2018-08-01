@@ -180,7 +180,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abstractions\IHttpContextAccessor.cs" />
-    <Compile Include="CancelUnauthorizedClientRedirection.cs" />
     <Compile Include="HttpContextAccessor.cs" />
     <Compile Include="ImpersonationServiceInitializer.cs" />
     <Compile Include="ImpersonationTicketExpirationModule.cs" />
@@ -189,6 +188,7 @@
     <Compile Include="HomePageSnippet.cs" />
     <Compile Include="ImpersonationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TicketUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -37,7 +37,6 @@ namespace Rhetos.WindowsAuthImpersonation
         {
             builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().InstancePerLifetimeScope();
             builder.RegisterType<ImpersonationService>().InstancePerLifetimeScope();
-            builder.RegisterType<Func<ImpersonationService>>().InstancePerLifetimeScope();
 
             Plugins.CheckOverride<IUserInfo, ImpersonationUserInfo>(builder, typeof(WcfWindowsUserInfo));
             builder.RegisterType<ImpersonationUserInfo>().As<IUserInfo>().InstancePerLifetimeScope();

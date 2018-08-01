@@ -54,7 +54,6 @@ namespace Rhetos.WindowsAuthImpersonation
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)]
     public class ImpersonationService
     {
-        public static readonly TimeSpan TicketTimeout = TimeSpan.FromMinutes(2);
         public static readonly string ImpersonatingUserInfoPrefix = "Impersonating:";
         public static readonly Claim IncreasePermissionsClaim = new Claim("WindowsAuthImpersonation.Impersonate", "IncreasePermissions");
         public static readonly string[] SupportedAuthenticationTypes = {"Negotiate", "Windows", "Kerberos"};
@@ -78,7 +77,7 @@ namespace Rhetos.WindowsAuthImpersonation
         {
             _logger = logProvider.GetLogger(GetType().Name);
 
-            _logger.Info(() => "New instance of ImpersonationService created.");
+            _logger.Trace(() => "New instance of ImpersonationService created.");
 
             _authorizationManager = authorizationManager;
             _principals = principals;
@@ -91,21 +90,6 @@ namespace Rhetos.WindowsAuthImpersonation
 
         #region Service HttpMethods
 
-        [OperationContract]
-        [WebInvoke(Method = "GET", UriTemplate = "/Test", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Xml)]
-        public string Test()
-        {
-            var cookieValue = _httpContextAccessor.HttpContext.Request.Cookies[FormsAuthentication.FormsCookieName]?.Value;
-            var response = new
-            {
-                ticket = cookieValue == null ? null : FormsAuthentication.Decrypt(cookieValue),
-                authType = _httpContextAccessor.HttpContext.User.Identity.AuthenticationType,
-                userType = _httpContextAccessor.HttpContext.User.GetType().FullName
-            };
-            _logger.Error(() => "Fake error message to test user context.");
-            return JsonConvert.SerializeObject(response, Formatting.Indented);
-        }
-
 
         [OperationContract]
         [WebInvoke(Method = "POST", UriTemplate = "/Impersonate", BodyStyle = WebMessageBodyStyle.Bare, RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json)]
@@ -114,7 +98,7 @@ namespace Rhetos.WindowsAuthImpersonation
             if (parameters == null)
                 throw new ClientException("It is not allowed to call this service method with no parameters provided.");
 
-            _logger.Trace(() => "Impersonate: " + _httpContextAccessor.HttpContext.User.Identity.Name + " as " + parameters.ImpersonatedUser);
+            _logger.Trace(() => $"Impersonate: {GetActualUserName()} as {parameters.ImpersonatedUser}.");
             parameters.Validate();
 
             var impersonatedUserName = GetImpersonatedUserName();
@@ -160,42 +144,6 @@ namespace Rhetos.WindowsAuthImpersonation
                 throw new FrameworkException($"WindowsAuthImpersonation plugin does not support AuthenticationType '{type}'.");
 
             return identity.Name;
-        }
-
-        public void SlideExpirationIfValidTicket()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-            // if there is already a new value for cookie present, skip the operation
-            if (httpContext.Response.Cookies.AllKeys.Contains(FormsAuthentication.FormsCookieName)) return;
-
-            var ticket = GetExistingTicket();
-            if (ticket == null) return;
-
-            // if ticket has expired, lets do some housekeeping and remove it from cookies
-            if (!IsTicketValid(ticket))
-            {
-                AddResponseCookie(null);
-                return;
-            }
-
-            _logger.Info($"Found valid existing ticket with expiration: {ticket.Expiration.ToString("s")}");
-
-            var ageLeft = ticket.Expiration - DateTime.Now;
-            
-            // do nothing if ticket is either expired or half of timeout has not yet passed
-            if (ageLeft.TotalSeconds < 0 || ageLeft.TotalSeconds > TicketTimeout.TotalSeconds / 2) return;
-
-            _logger.Info($"Cookie age left is {ageLeft.TotalMinutes:#} minutes, refreshing expiration.");
-            var newTicket = new FormsAuthenticationTicket(
-                ticket.Version,
-                ticket.Name,
-                ticket.IssueDate, 
-                DateTime.Now + TicketTimeout,
-                false,
-                ticket.UserData,
-                ticket.CookiePath);
-
-            AddResponseCookie(newTicket);
         }
 
         #endregion
@@ -260,27 +208,12 @@ namespace Rhetos.WindowsAuthImpersonation
         {
             var actualUserName = GetActualUserName();
 
-            var existingTicket = GetExistingTicket();
-            if (existingTicket != null)
-            {
-                if (IsTicketValid(existingTicket))
-                {
-                    _logger.Info($"Found valid existing ticket with expiration: {existingTicket.Expiration.ToString("s")}");
-                    return existingTicket;
-                }
-            }
+            var existingTicket = TicketUtility.GetExistingTicket(_httpContextAccessor.HttpContext);
+            if (existingTicket != null && IsTicketValid(existingTicket))
+                return existingTicket;
 
             // ticket not found or not valid, we will create a fresh one
-            return new FormsAuthenticationTicket(2, actualUserName, DateTime.Now, DateTime.Now + TicketTimeout, false, null);
-        }
-
-        private FormsAuthenticationTicket GetExistingTicket()
-        {
-            var authenticationCookie = _httpContextAccessor.HttpContext.Request.Cookies[FormsAuthentication.FormsCookieName];
-            if (string.IsNullOrEmpty(authenticationCookie?.Value)) return null;
-
-            var decryptedTicket = FormsAuthentication.Decrypt(authenticationCookie.Value);
-            return decryptedTicket;
+            return new FormsAuthenticationTicket(2, actualUserName, DateTime.Now, DateTime.Now + TicketUtility.TicketTimeout.Value, false, null);
         }
 
         private bool IsTicketValid(FormsAuthenticationTicket authenticationTicket)
@@ -293,7 +226,7 @@ namespace Rhetos.WindowsAuthImpersonation
         {
             if (string.IsNullOrEmpty(impersonatedUser))
             {
-                AddResponseCookie(null);
+                TicketUtility.AddToResponseCookie(null, _httpContextAccessor.HttpContext);
                 return;
             }
 
@@ -306,18 +239,7 @@ namespace Rhetos.WindowsAuthImpersonation
                 impersonatedUser == null ? "" : ImpersonatingUserInfoPrefix + impersonatedUser,
                 _authenticationTicket.Value.CookiePath);
 
-            AddResponseCookie(newTicket);
-        }
-
-        private void AddResponseCookie(FormsAuthenticationTicket authenticationTicket)
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-
-            var authenticationCookie = authenticationTicket == null
-                ? new HttpCookie(FormsAuthentication.FormsCookieName) { Expires = DateTime.Now.AddYears(-1) } 
-                : new HttpCookie(FormsAuthentication.FormsCookieName, FormsAuthentication.Encrypt(authenticationTicket));
-
-            httpContext.Response.Cookies.Add(authenticationCookie);
+            TicketUtility.AddToResponseCookie(newTicket, _httpContextAccessor.HttpContext);
         }
 
         #endregion

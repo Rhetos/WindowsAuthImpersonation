@@ -20,21 +20,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Security;
+using Autofac;
+using Autofac.Integration.Wcf;
 using Rhetos.Logging;
 
 namespace Rhetos.WindowsAuthImpersonation
 {
+    // ideally this class should use DI and utilize existing services, but the way Rhetos/Autofac/Wcf are setup, request lifetimescope
+    // does not exist during httpmodule runtime flow
     public class ImpersonationTicketExpirationModule : IHttpModule
     {
-        private readonly Func<ImpersonationService> _impersonationServiceFactory;
         private readonly ILogProvider _logProvider;
 
-        public ImpersonationTicketExpirationModule(Func<ImpersonationService> impersonationServiceFactory, ILogProvider logProvider)
+        public ImpersonationTicketExpirationModule(ILogProvider logProvider)
         {
-            _impersonationServiceFactory = impersonationServiceFactory;
             _logProvider = logProvider;
         }
 
@@ -42,34 +46,61 @@ namespace Rhetos.WindowsAuthImpersonation
         {
             var log = _logProvider.GetLogger(GetType().Name);
             log.Info(() => $"ImpersonationTicketExpirationModule initializing. Adding EndRequest event handler.");
-            context.PreSendRequestHeaders += OnEndRequest;
+            context.PreSendRequestHeaders += OnPreSendRequestHeaders;
         }
 
         public void Dispose()
         {
-            var log = _logProvider.GetLogger(GetType().Name);
-            log.Info(() => $"ImpersonationTicketExpirationModule DISPOSE.");
         }
 
-        private void OnEndRequest(object sender, EventArgs e)
+        private void OnPreSendRequestHeaders(object sender, EventArgs e)
         {
-            throw new NotImplementedException("ImpersonationService is instanced in the wrong scope!");
             var app = (HttpApplication)sender;
 
             // this event may be called during authentication requests; ImpersionationService doesn't work (and shouldn't) in that situation
             // so we will skip ticket refreshing as well
             if (!app.Request.IsAuthenticated) return;
 
+            SlideExpirationIfValidTicket();
+        }
+
+        public void SlideExpirationIfValidTicket()
+        {
+            var httpContext = HttpContext.Current;
             var log = _logProvider.GetLogger(GetType().Name);
-            var impersonationService = _impersonationServiceFactory();
-            // log.Info($"OnEndRequest - resolved {impersonationService.GetType().Name}");
 
+            // if there is already a new value for cookie present in the response, skip the operation
+            if (httpContext.Response.Cookies.AllKeys.Contains(FormsAuthentication.FormsCookieName)) return;
 
-            //log.Info($"OnEndRequest[appId={appId}]: {app.Request.RawUrl} Headers: {app.Request.Headers.Count}, {hInfo}");
-            
-            // log.Info($"OnEndRequest: {app.Context.CurrentHandler?.GetType().Name} {app.Response.StatusCode}.{app.Response.SubStatusCode}, {app.Request.RawUrl}");
-            // app.Response.Write("<div>Appended line by custom Sasa module</div>");
-            impersonationService.SlideExpirationIfValidTicket();
+            var ticket = TicketUtility.GetExistingTicket(httpContext);
+            if (ticket == null) return;
+
+            // if ticket has expired, lets do some housekeeping and remove it from cookies
+            if (ticket.Expired)
+            {
+                log.Trace(() => $"Found expired ticket, removing it.");
+                TicketUtility.AddToResponseCookie(null, httpContext);
+                return;
+            }
+
+            log.Trace(() => $"Found valid existing ticket with expiration: {ticket.Expiration.ToString("s")}");
+
+            var ageLeft = ticket.Expiration - DateTime.Now;
+
+            // do nothing if half of timeout has not yet passed
+            if (ageLeft.TotalSeconds > TicketUtility.TicketTimeout.Value.TotalSeconds / 2) return;
+
+            log.Trace(() => $"Cookie age left is {ageLeft.TotalMinutes:0} minutes, refreshing expiration.");
+            var newTicket = new FormsAuthenticationTicket(
+                ticket.Version,
+                ticket.Name,
+                ticket.IssueDate,
+                DateTime.Now + TicketUtility.TicketTimeout.Value,
+                false,
+                ticket.UserData,
+                ticket.CookiePath);
+
+            TicketUtility.AddToResponseCookie(newTicket, httpContext);
         }
     }
 }

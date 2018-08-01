@@ -28,10 +28,12 @@ using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
+using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.Text;
 using System.Web;
@@ -44,11 +46,11 @@ namespace Rhetos.AspNetFormsAuthImpersonation
     {
         private readonly IHttpModule _impersonationTickedExpirationModule;
 
-        public ImpersonationServiceInitializer(Func<ImpersonationService> impersonationServiceFactory, ILogProvider logProvider)
+        public ImpersonationServiceInitializer(ILogProvider logProvider)
         {
             var log = logProvider.GetLogger(GetType().Name);
             log.Info(() =>"ImpersonationServiceInitializer instantianted. Creating single ImpersonationTicketExpirationModule instance.");
-            _impersonationTickedExpirationModule = new ImpersonationTicketExpirationModule(impersonationServiceFactory, logProvider);
+            _impersonationTickedExpirationModule = new ImpersonationTicketExpirationModule(logProvider);
         }
 
         public void Initialize()

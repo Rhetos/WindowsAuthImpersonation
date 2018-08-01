@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.Web.Security;
 
 namespace Rhetos.WindowsAuthImpersonation
 {
@@ -46,35 +47,37 @@ namespace Rhetos.WindowsAuthImpersonation
         {
             get
             {
+                const string impersonatingTag = "<!-- CurrentlyImpersonatingTag -->";
                 var html = _snippet.Value;
+                var tagValue = "Currently <b>not</b> impersonating any user.";
 
                 string impersonatedUser = GetImpersonatedUser();
                 if (impersonatedUser != null)
                 {
-                    const string impersonatingTag = "<!-- CurrentlyImpersonatingTag -->";
-
-                    var impersonatingSnippet = string.Format(
-                        "<p>Currently impersonating user: <b>{0}</b>.</p>",
+                    tagValue = string.Format("<p>Currently impersonating user: <b>{0}</b>.</p>",
                         HttpUtility.HtmlEncode(impersonatedUser));
-
-                    html = html.Replace(impersonatingTag, impersonatingSnippet);
                 }
 
+                html = html.Replace(impersonatingTag, tagValue);
                 return html;
             }
         }
 
         public static string GetImpersonatedUser()
         {
-            var formsIdentity = (HttpContext.Current.User.Identity as System.Web.Security.FormsIdentity);
-            if (formsIdentity != null && formsIdentity.IsAuthenticated)
-            {
-                string userData = formsIdentity.Ticket.UserData;
-                const string prefix = "Impersonating:";
-                if (!string.IsNullOrEmpty(userData) && userData.StartsWith(prefix))
-                    return userData.Substring(prefix.Length);
-            }
-            return null;
+            const string cookieName = "Rhetos.WindowsAuthImpersonation";
+            const string impersonationPrefix = "Impersonating:";
+
+            var authenticationCookie = HttpContext.Current?.Request?.Cookies[cookieName];
+            if (string.IsNullOrEmpty(authenticationCookie?.Value)) return null;
+
+            var decryptedTicket = FormsAuthentication.Decrypt(authenticationCookie.Value);
+
+            if (decryptedTicket.Expired) return null;
+            if (string.IsNullOrEmpty(decryptedTicket.Name) || decryptedTicket.Name != HttpContext.Current.User?.Identity?.Name) return null;
+            if (string.IsNullOrEmpty(decryptedTicket.UserData) || !decryptedTicket.UserData.StartsWith(impersonationPrefix)) return null;
+
+            return decryptedTicket.UserData.Substring(impersonationPrefix.Length);
         }
     }
 }
