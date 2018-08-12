@@ -56,6 +56,7 @@ namespace Rhetos.WindowsAuthImpersonation
     {
         public static readonly string ImpersonatingUserInfoPrefix = "Impersonating:";
         public static readonly Claim IncreasePermissionsClaim = new Claim("WindowsAuthImpersonation.Impersonate", "IncreasePermissions");
+        public static readonly Claim AllowImpersonationsClaim = new Claim("WindowsAuthImpersonation.Impersonate", "AllowImpersonation");
         public static readonly string[] SupportedAuthenticationTypes = {"Negotiate", "Windows", "Kerberos"};
 
         private readonly ILogger _logger;
@@ -168,6 +169,11 @@ namespace Rhetos.WindowsAuthImpersonation
             // otherwise the provided error information would be a security issue.
             if (impersonatedPrincipalId == default(Guid))
                 throw new UserException("User '{0}' is not registered.", new[] { impersonatedUser }, null, null);
+
+            var allowImpersonationPermissions = _authorizationManager.Value.GetAuthorizations(new[] {AllowImpersonationsClaim}).Single();
+            if (!allowImpersonationPermissions)
+                throw new UserException(
+                    $"User '{GetActualUserName()}' doesn't have permission to impersonate other users. Claim '{AllowImpersonationsClaim.FullName}' is required.");
 
             var allowIncreasePermissions = _authorizationManager.Value.GetAuthorizations(new[] { IncreasePermissionsClaim }).Single();
             if (allowIncreasePermissions) return;
