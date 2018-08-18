@@ -29,6 +29,6 @@ namespace Rhetos.WindowsAuthImpersonation
 {
     public class HttpContextAccessor : IHttpContextAccessor
     {
-        public HttpContext HttpContext => HttpContext.Current;
+        public HttpContextBase HttpContext => new HttpContextWrapper(System.Web.HttpContext.Current);
     }
 }

@@ -180,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abstractions\IHttpContextAccessor.cs" />
+    <Compile Include="Abstractions\IImpersonationUserInfo.cs" />
     <Compile Include="HttpContextAccessor.cs" />
     <Compile Include="ImpersonationServiceInitializer.cs" />
     <Compile Include="ImpersonationTicketExpirationModule.cs" />

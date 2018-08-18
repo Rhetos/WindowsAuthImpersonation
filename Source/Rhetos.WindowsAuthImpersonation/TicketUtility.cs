@@ -34,7 +34,7 @@ namespace Rhetos.WindowsAuthImpersonation
         public static readonly string CookieName = "Rhetos.WindowsAuthImpersonation";
         public static readonly Lazy<TimeSpan> TicketTimeout = new Lazy<TimeSpan>(ReadTimeoutFromConfiguration);
 
-        public static FormsAuthenticationTicket GetExistingTicket(HttpContext httpContext)
+        public static FormsAuthenticationTicket GetExistingTicket(HttpContextBase httpContext)
         {
             var authenticationCookie = httpContext.Request.Cookies[CookieName];
             if (string.IsNullOrEmpty(authenticationCookie?.Value)) return null;
@@ -43,7 +43,7 @@ namespace Rhetos.WindowsAuthImpersonation
             return decryptedTicket;
         }
 
-        public static void AddToResponseCookie(FormsAuthenticationTicket authenticationTicket, HttpContext httpContext)
+        public static void AddToResponseCookie(FormsAuthenticationTicket authenticationTicket, HttpContextBase httpContext)
         {
             var authenticationCookie = authenticationTicket == null
                 ? new HttpCookie(CookieName) { Expires = DateTime.Now.AddYears(-1) }

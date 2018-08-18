@@ -66,7 +66,7 @@ namespace Rhetos.WindowsAuthImpersonation
 
         public void SlideExpirationIfValidTicket()
         {
-            var httpContext = HttpContext.Current;
+            var httpContext = new HttpContextWrapper(HttpContext.Current);
             var log = _logProvider.GetLogger(GetType().Name);
 
             // if there is already a new value for cookie present in the response, skip the operation

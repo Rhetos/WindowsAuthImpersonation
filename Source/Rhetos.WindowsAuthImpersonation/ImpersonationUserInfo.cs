@@ -27,11 +27,12 @@ using System.Text;
 using System.Web;
 using System.Web.Security;
 using Rhetos.Logging;
+using Rhetos.WindowsAuthImpersonation.Abstractions;
 
 namespace Rhetos.WindowsAuthImpersonation
 {
     [Export(typeof(IUserInfo))]
-    public class ImpersonationUserInfo : IUserInfo
+    public class ImpersonationUserInfo : IImpersonationUserInfo
     {
         #region IUserInfo implementation
 

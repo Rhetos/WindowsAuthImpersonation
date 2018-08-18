@@ -28,6 +28,6 @@ namespace Rhetos.WindowsAuthImpersonation.Abstractions
 {
     public interface IHttpContextAccessor
     {
-        HttpContext HttpContext { get; }
+        HttpContextBase HttpContext { get; }
     }
 }
