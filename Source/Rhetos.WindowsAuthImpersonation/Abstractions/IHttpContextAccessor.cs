@@ -17,31 +17,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using Autofac;
-using Rhetos.Extensibility;
-using Rhetos.Security;
-using Rhetos.Utilities;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
-using Rhetos.WindowsAuthImpersonation.Abstractions;
+using System.Threading.Tasks;
+using System.Web;
 
-namespace Rhetos.WindowsAuthImpersonation
+namespace Rhetos.WindowsAuthImpersonation.Abstractions
 {
-    [Export(typeof(Module))]
-    public class AutofacModuleConfiguration : Module
+    public interface IHttpContextAccessor
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().InstancePerLifetimeScope();
-            builder.RegisterType<ImpersonationService>().InstancePerLifetimeScope();
-
-            Plugins.CheckOverride<IUserInfo, ImpersonationUserInfo>(builder, typeof(WcfWindowsUserInfo));
-            builder.RegisterType<ImpersonationUserInfo>().As<IUserInfo>().InstancePerLifetimeScope();
-
-            base.Load(builder);
-        }
+        HttpContextBase HttpContext { get; }
     }
 }

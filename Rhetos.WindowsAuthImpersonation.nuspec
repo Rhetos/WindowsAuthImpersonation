@@ -12,13 +12,12 @@
     <tags>Rhetos plugin</tags>
     <dependencies>
       <dependency id="Rhetos.CommonConcepts" version="1.0.0" />
-      <dependency id="Rhetos.RestGenerator" version="2.0.0" />
     </dependencies>
   </metadata>
   <files>
     <file src="Readme.md" target="" />
-    <file src="Source\DslScripts\**\*" target="DslScripts" />
     <file src="Source\Resources\**\*" target="Resources" />
+    <file src="Source\DslScripts\**\*" target="DslScripts" />
     <file src="Source\Rhetos.WindowsAuthImpersonation\bin\Debug\Rhetos.WindowsAuthImpersonation.dll" target="lib\net451" />
     <file src="Source\Rhetos.WindowsAuthImpersonation\bin\Debug\Rhetos.WindowsAuthImpersonation.pdb" target="lib\net451" />
   </files>

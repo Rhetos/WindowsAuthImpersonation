@@ -167,6 +167,9 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Activation" />
+    <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -176,11 +179,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstractions\IHttpContextAccessor.cs" />
+    <Compile Include="Abstractions\IImpersonationUserInfo.cs" />
+    <Compile Include="HttpContextAccessor.cs" />
+    <Compile Include="ImpersonationServiceInitializer.cs" />
+    <Compile Include="ImpersonationTicketExpirationModule.cs" />
     <Compile Include="ImpersonationUserInfo.cs" />
     <Compile Include="AutofacModuleConfiguration.cs" />
     <Compile Include="HomePageSnippet.cs" />
     <Compile Include="ImpersonationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TicketUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
