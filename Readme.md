@@ -1,9 +1,11 @@
 # WindowsAuthImpersonation
 
 WindowsAuthImpersonation is a plugin package for [Rhetos development platform](https://github.com/Rhetos/Rhetos).
-It allows users to issue requests as another user when using Windows Authentication and http client with cookie support.
-Most common scenario is using this plugin together with with [RestGenerator](https://github.com/Rhetos/RestGenerator) plugin for RESTful access to Rhetos.
+It allows users to issue requests as another user when using Windows Authentication and HTTP client with cookie support.
 The impersonation information is persisted in the custom authentication cookie.
+
+Most common scenario is using this plugin together with with [RestGenerator](https://github.com/Rhetos/RestGenerator) plugin for RESTful access to Rhetos.
+
 
 Contents:
 
