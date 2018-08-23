@@ -9,9 +9,8 @@ Most common scenario is using this plugin together with with [RestGenerator](htt
 
 Contents:
 
-* [WindowsAuthImpersonation](#windowsauthimpersonation)
-    * [Build](#build)
-    * [Installation and configuration](#installation-and-configuration)
+  * [Build](#build)
+  * [Installation and configuration](#installation-and-configuration)
     * [Installation](#installation)
     * [Configuring user's permissions](#configuring-users-permissions)
     * [Simple administration GUI](#simple-administration-gui)
