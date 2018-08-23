@@ -49,7 +49,7 @@ namespace Rhetos.AspNetFormsAuthImpersonation
         public ImpersonationServiceInitializer(ILogProvider logProvider)
         {
             var log = logProvider.GetLogger(GetType().Name);
-            log.Info(() =>"ImpersonationServiceInitializer instantianted. Creating single ImpersonationTicketExpirationModule instance.");
+            log.Trace(() =>"ImpersonationServiceInitializer instantianted. Creating single ImpersonationTicketExpirationModule instance.");
             _impersonationTickedExpirationModule = new ImpersonationTicketExpirationModule(logProvider);
         }
 

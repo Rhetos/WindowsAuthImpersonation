@@ -57,7 +57,7 @@ namespace Rhetos.WindowsAuthImpersonation
         public static readonly string ImpersonatingUserInfoPrefix = "Impersonating:";
         public static readonly Claim IncreasePermissionsClaim = new Claim("WindowsAuthImpersonation.Impersonate", "IncreasePermissions");
         public static readonly Claim AllowImpersonationsClaim = new Claim("WindowsAuthImpersonation.Impersonate", "AllowImpersonation");
-        public static readonly string[] SupportedAuthenticationTypes = {"Negotiate", "Windows", "Kerberos"};
+        public static readonly string[] SupportedAuthenticationTypes = {"Negotiate", "Windows", "Kerberos", "NTLM"};
 
         private readonly ILogger _logger;
         private readonly Lazy<IAuthorizationManager> _authorizationManager;

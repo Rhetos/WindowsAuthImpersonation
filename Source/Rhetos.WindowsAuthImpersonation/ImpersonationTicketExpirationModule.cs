@@ -45,7 +45,7 @@ namespace Rhetos.WindowsAuthImpersonation
         public void Init(HttpApplication context)
         {
             var log = _logProvider.GetLogger(GetType().Name);
-            log.Info(() => $"ImpersonationTicketExpirationModule initializing. Adding EndRequest event handler.");
+            log.Trace(() => $"ImpersonationTicketExpirationModule initializing. Adding EndRequest event handler.");
             context.PreSendRequestHeaders += OnPreSendRequestHeaders;
         }
 
