@@ -1,1 +1,2 @@
 CustomClaim 'WindowsAuthImpersonation.Impersonate' 'AllowImpersonation';
+CustomClaim 'WindowsAuthImpersonation.Impersonate' 'IncreasePermissions';
