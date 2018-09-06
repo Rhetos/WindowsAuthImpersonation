@@ -14,6 +14,7 @@ Contents:
     * [Installation](#installation)
     * [Configuring user's permissions](#configuring-users-permissions)
     * [Simple administration GUI](#simple-administration-gui)
+    * [Sliding expiration timeout](#sliding-expiration-timeout)
   * [Impersonation web service API](#impersonation-web-service-api)
     * [Impersonate](#impersonate)
     * [StopImpersonating](#stopimpersonating)
@@ -55,6 +56,17 @@ The following security claims are used in the impersonation web service:
 ### Simple administration GUI
 
 For testing and administration, a simple web GUI is available at the Rhetos server homepage under *WindowsAuthImpersonation* header.
+
+### Sliding expiration timeout
+
+Plugin implements a cookie sliding expiration behavior. It will renew cookies (reset expiration) on requests, so only idle clients' cookies will expire.
+Idle expiration timeout can be configured via Rhetos web.config configuration file by adding a setting:
+```
+  <appSettings>
+    <add key="ImpersonationTicketSlidingTimeoutMins" value="30" />
+  </appSettings>
+```
+Expiration value is specified in minutes and defaults to 30.
 
 ## Impersonation web service API
 
