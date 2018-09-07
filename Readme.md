@@ -6,19 +6,18 @@ The impersonation information is persisted in the custom authentication cookie.
 
 Most common scenario is using this plugin together with with [RestGenerator](https://github.com/Rhetos/RestGenerator) plugin for RESTful access to Rhetos.
 
-
 Contents:
 
-  * [Build](#build)
-  * [Installation and configuration](#installation-and-configuration)
-    * [Installation](#installation)
-    * [Configuring user's permissions](#configuring-users-permissions)
-    * [Simple administration GUI](#simple-administration-gui)
-    * [Sliding expiration timeout](#sliding-expiration-timeout)
-  * [Impersonation web service API](#impersonation-web-service-api)
-    * [Impersonate](#impersonate)
-    * [StopImpersonating](#stopimpersonating)
-  * [Implementing web GUI](#implementing-web-gui)
+* [Build](#build)
+* [Installation and configuration](#installation-and-configuration)
+  * [Installation](#installation)
+  * [Configuring user's permissions](#configuring-users-permissions)
+  * [Simple administration GUI](#simple-administration-gui)
+  * [Sliding expiration timeout](#sliding-expiration-timeout)
+* [Impersonation web service API](#impersonation-web-service-api)
+  * [Impersonate](#impersonate)
+  * [StopImpersonating](#stopimpersonating)
+* [Implementing web GUI](#implementing-web-gui)
 
 ## Build
 
@@ -26,6 +25,7 @@ Contents:
 You don't need to build it from source in order to use it in your application.
 
 Development environment:
+
 * Visual Studio 2015 or newer.
 
 To build the package from source, run `Build.bat`.
@@ -61,11 +61,13 @@ For testing and administration, a simple web GUI is available at the Rhetos serv
 
 Plugin implements a cookie sliding expiration behavior. It will renew cookies (reset expiration) on requests, so only idle clients' cookies will expire.
 Idle expiration timeout can be configured via Rhetos web.config configuration file by adding a setting:
-```
+
+```xml
   <appSettings>
     <add key="ImpersonationTicketSlidingTimeoutMins" value="30" />
   </appSettings>
 ```
+
 Expiration value is specified in minutes and defaults to 30.
 
 ## Impersonation web service API
