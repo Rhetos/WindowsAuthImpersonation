@@ -18,17 +18,34 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
+using System.Web.Security;
 using Rhetos.WindowsAuthImpersonation.Abstractions;
 
 namespace Rhetos.WindowsAuthImpersonation
 {
     public class HttpContextAccessor : IHttpContextAccessor
     {
-        public HttpContextBase HttpContext => new HttpContextWrapper(System.Web.HttpContext.Current);
+        public bool? IsUserAuthenticated => HttpContext.Current?.User?.Identity?.IsAuthenticated;
+        public string UserName => HttpContext.Current?.User?.Identity?.Name;
+        public string AuthenticationType => HttpContext.Current?.User?.Identity?.AuthenticationType;
+
+        public FormsAuthenticationTicket GetAuthenticationTicket()
+        {
+            var authenticationCookie = HttpContext.Current.Request.Cookies[TicketUtility.CookieName];
+            if (string.IsNullOrEmpty(authenticationCookie?.Value)) return null;
+
+            var decryptedTicket = FormsAuthentication.Decrypt(authenticationCookie.Value);
+            return decryptedTicket;
+        }
+
+        public void AddTicketToResponse(FormsAuthenticationTicket authenticationTicket)
+        {
+            var authenticationCookie = authenticationTicket == null
+                ? new HttpCookie(TicketUtility.CookieName) { Expires = DateTime.Now.AddYears(-1) }
+                : new HttpCookie(TicketUtility.CookieName, FormsAuthentication.Encrypt(authenticationTicket));
+
+            HttpContext.Current.Response.Cookies.Add(authenticationCookie);
+        }
     }
 }

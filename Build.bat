@@ -2,8 +2,17 @@ SETLOCAL
 SET Version=1.1.0
 SET Prerelease=auto
 
-IF NOT DEFINED VisualStudioVersion CALL "%VS140COMNTOOLS%VsDevCmd.bat" || ECHO ERROR: Cannot find Visual Studio 2015, missing VS140COMNTOOLS variable. && GOTO Error0
+@IF DEFINED VisualStudioVersion GOTO SkipVcvarsall
+@SET VSTOOLS=
+@IF EXIST "%VS100COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS100COMNTOOLS%..\..\VC\vcvarsall.bat" x86
+@IF EXIST "%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" x86
+@IF EXIST "%VS120COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS120COMNTOOLS%..\..\VC\vcvarsall.bat" x86
+@IF EXIST "%VS130COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS130COMNTOOLS%..\..\VC\vcvarsall.bat" x86
+@IF EXIST "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" x86
+@IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" SET VSTOOLS="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x86
+CALL %VSTOOLS% || GOTO Error0
 @ECHO ON
+:SkipVcvarsall
 
 REM Updating the version of all projects.
 PowerShell -ExecutionPolicy ByPass .\Tools\Build\ChangeVersion.ps1 %Version% %Prerelease% || GOTO Error0

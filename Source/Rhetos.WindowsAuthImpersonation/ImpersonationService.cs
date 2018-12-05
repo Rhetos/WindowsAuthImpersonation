@@ -22,15 +22,11 @@ using Rhetos.Logging;
 using Rhetos.Security;
 using Rhetos.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
 using System.ServiceModel.Web;
-using System.Text;
-using System.Web;
 using System.Web.Security;
-using Newtonsoft.Json;
 using Rhetos.WindowsAuthImpersonation.Abstractions;
 
 namespace Rhetos.WindowsAuthImpersonation
@@ -66,7 +62,6 @@ namespace Rhetos.WindowsAuthImpersonation
         private readonly Lazy<IAuthorizationProvider> _authorizationProvider;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        private readonly Lazy<FormsAuthenticationTicket> _authenticationTicket;
 
         public ImpersonationService(
             ILogProvider logProvider,
@@ -85,8 +80,6 @@ namespace Rhetos.WindowsAuthImpersonation
             _claims = claims;
             _authorizationProvider = authorizationProvider;
             _httpContextAccessor = httpContextAccessor;
-
-            _authenticationTicket = new Lazy<FormsAuthenticationTicket>(GetOrCreateTicket);
         }
 
         #region Service HttpMethods
@@ -126,7 +119,7 @@ namespace Rhetos.WindowsAuthImpersonation
 
         public string GetImpersonatedUserName()
         {
-            var userData = _authenticationTicket.Value.UserData;
+            var userData = GetOrCreateTicket().UserData;
 
             if (!string.IsNullOrEmpty(userData) && !userData.StartsWith(ImpersonatingUserInfoPrefix))
                 throw new FrameworkException("Login impersonation plugin is not supported (" + GetType().FullName + "). The authentication ticket already has the UserData property set.");
@@ -136,15 +129,14 @@ namespace Rhetos.WindowsAuthImpersonation
 
         public string GetActualUserName()
         {
-            var identity = _httpContextAccessor.HttpContext?.User?.Identity;
-            if (identity?.IsAuthenticated != true || string.IsNullOrEmpty(identity?.Name))
+            if (_httpContextAccessor.IsUserAuthenticated != true || string.IsNullOrEmpty(_httpContextAccessor.UserName))
                 throw new FrameworkException("WindowsAuthImpersonation plugin does not support unauthenticated requests.");
 
-            var type = _httpContextAccessor.HttpContext?.User?.Identity?.AuthenticationType;
+            var type = _httpContextAccessor.AuthenticationType;
             if (!SupportedAuthenticationTypes.Contains(type))
                 throw new FrameworkException($"WindowsAuthImpersonation plugin does not support AuthenticationType '{type}'.");
 
-            return identity.Name;
+            return _httpContextAccessor.UserName;
         }
 
         #endregion
@@ -212,13 +204,12 @@ namespace Rhetos.WindowsAuthImpersonation
 
         private FormsAuthenticationTicket GetOrCreateTicket()
         {
-            var actualUserName = GetActualUserName();
-
-            var existingTicket = TicketUtility.GetExistingTicket(_httpContextAccessor.HttpContext);
+            var existingTicket = _httpContextAccessor.GetAuthenticationTicket();
             if (existingTicket != null && IsTicketValid(existingTicket))
                 return existingTicket;
 
             // ticket not found or not valid, we will create a fresh one
+            var actualUserName = GetActualUserName();
             return new FormsAuthenticationTicket(2, actualUserName, DateTime.Now, DateTime.Now + TicketUtility.TicketTimeout.Value, false, null);
         }
 
@@ -232,20 +223,21 @@ namespace Rhetos.WindowsAuthImpersonation
         {
             if (string.IsNullOrEmpty(impersonatedUser))
             {
-                TicketUtility.AddToResponseCookie(null, _httpContextAccessor.HttpContext);
+                _httpContextAccessor.AddTicketToResponse(null);
                 return;
             }
 
+            var ticket = GetOrCreateTicket();
             var newTicket = new FormsAuthenticationTicket(
-                _authenticationTicket.Value.Version,
-                _authenticationTicket.Value.Name,
-                _authenticationTicket.Value.IssueDate,
-                _authenticationTicket.Value.Expiration,
+                ticket.Version,
+                ticket.Name,
+                ticket.IssueDate,
+                ticket.Expiration,
                 false,
                 impersonatedUser == null ? "" : ImpersonatingUserInfoPrefix + impersonatedUser,
-                _authenticationTicket.Value.CookiePath);
+                ticket.CookiePath);
 
-            TicketUtility.AddToResponseCookie(newTicket, _httpContextAccessor.HttpContext);
+            _httpContextAccessor.AddTicketToResponse(newTicket);
         }
 
         #endregion
