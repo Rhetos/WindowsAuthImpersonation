@@ -4,10 +4,6 @@ SET Prerelease=auto
 
 @IF DEFINED VisualStudioVersion GOTO SkipVcvarsall
 @SET VSTOOLS=
-@IF EXIST "%VS100COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS100COMNTOOLS%..\..\VC\vcvarsall.bat" x86
-@IF EXIST "%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" x86
-@IF EXIST "%VS120COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS120COMNTOOLS%..\..\VC\vcvarsall.bat" x86
-@IF EXIST "%VS130COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS130COMNTOOLS%..\..\VC\vcvarsall.bat" x86
 @IF EXIST "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" SET VSTOOLS="%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" x86
 @IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" SET VSTOOLS="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" -arch=x86
 CALL %VSTOOLS% || GOTO Error0

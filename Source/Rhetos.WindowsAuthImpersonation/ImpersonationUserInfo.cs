@@ -32,7 +32,7 @@ namespace Rhetos.WindowsAuthImpersonation
 
         #region IUserInfo implementation
 
-        public bool IsUserRecognized => _impersonationService.GetActualUserName() != null;
+        public bool IsUserRecognized => !string.IsNullOrWhiteSpace(_impersonationService.GetActualUserName());
         public string UserName => _impersonationService.GetImpersonatedUserName() ?? _impersonationService.GetActualUserName();
         public string Workstation => IsUserRecognized ? _workstation.Value : null;
         public string Report()
