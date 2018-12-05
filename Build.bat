@@ -1,5 +1,5 @@
 SETLOCAL
-SET Version=1.1.0
+SET Version=1.2.0
 SET Prerelease=auto
 
 @IF DEFINED VisualStudioVersion GOTO SkipVcvarsall
