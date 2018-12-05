@@ -17,17 +17,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
+using System.Web.Security;
 
 namespace Rhetos.WindowsAuthImpersonation.Abstractions
 {
     public interface IHttpContextAccessor
     {
-        HttpContextBase HttpContext { get; }
+        bool? IsUserAuthenticated { get; }
+        string UserName { get; }
+        string AuthenticationType { get; }
+        FormsAuthenticationTicket GetAuthenticationTicket();
+        void AddTicketToResponse(FormsAuthenticationTicket authenticationTicket);
     }
 }
