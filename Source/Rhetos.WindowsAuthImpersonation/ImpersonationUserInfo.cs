@@ -28,17 +28,23 @@ namespace Rhetos.WindowsAuthImpersonation
     [Export(typeof(IUserInfo))]
     public class ImpersonationUserInfo : IImpersonationUserInfo
     {
-        private readonly ImpersonationService _impersonationService;
+        private readonly IImpersonationProvider _impersonationProvider;
+
+        public ImpersonationUserInfo(IImpersonationProvider impersonationProvider, IWindowsSecurity windowsSecurity)
+        {
+            _impersonationProvider = impersonationProvider;
+            _workstation = new Lazy<string>(windowsSecurity.GetClientWorkstation);
+        }
 
         #region IUserInfo implementation
 
-        public bool IsUserRecognized => !string.IsNullOrWhiteSpace(_impersonationService.GetActualUserName());
-        public string UserName => _impersonationService.GetImpersonatedUserName() ?? _impersonationService.GetActualUserName();
+        public bool IsUserRecognized => !string.IsNullOrWhiteSpace(_impersonationProvider.GetActualUserName());
+        public string UserName => _impersonationProvider.GetImpersonatedUserName() ?? _impersonationProvider.GetActualUserName();
         public string Workstation => IsUserRecognized ? _workstation.Value : null;
         public string Report()
         {
-            var impersonatedUserName = _impersonationService.GetImpersonatedUserName();
-            var actualUserName = _impersonationService.GetActualUserName();
+            var impersonatedUserName = _impersonationProvider.GetImpersonatedUserName();
+            var actualUserName = _impersonationProvider.GetActualUserName();
 
             return impersonatedUserName != null 
                 ? $"{actualUserName} as {impersonatedUserName},{_workstation.Value}"
@@ -51,15 +57,8 @@ namespace Rhetos.WindowsAuthImpersonation
         /// Returns null if there is no impersonation.
         /// If the current user is impersonating another, this property returns the actual (not impersonated) user that is logged in.
         /// </summary>
-        public string ImpersonatedBy => _impersonationService.GetImpersonatedUserName() != null ? _impersonationService.GetActualUserName() : null;
+        public string ImpersonatedBy => _impersonationProvider.GetImpersonatedUserName() != null ? _impersonationProvider.GetActualUserName() : null;
 
         private readonly Lazy<string> _workstation;
-
-
-        public ImpersonationUserInfo(ImpersonationService impersonationService, IWindowsSecurity windowsSecurity)
-        {
-            _impersonationService = impersonationService;
-            _workstation = new Lazy<string>(windowsSecurity.GetClientWorkstation);
-        }
     }
 }
