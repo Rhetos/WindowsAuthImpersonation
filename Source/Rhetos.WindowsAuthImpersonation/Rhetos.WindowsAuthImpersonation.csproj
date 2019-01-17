@@ -180,8 +180,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abstractions\IHttpContextAccessor.cs" />
+    <Compile Include="Abstractions\IImpersonationProvider.cs" />
     <Compile Include="Abstractions\IImpersonationUserInfo.cs" />
     <Compile Include="HttpContextAccessor.cs" />
+    <Compile Include="ImpersonationProvider.cs" />
     <Compile Include="ImpersonationServiceInitializer.cs" />
     <Compile Include="ImpersonationTicketExpirationModule.cs" />
     <Compile Include="ImpersonationUserInfo.cs" />
