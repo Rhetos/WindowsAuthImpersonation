@@ -60,6 +60,9 @@ namespace Rhetos.WindowsAuthImpersonation
 
         public void SlideExpirationIfValidTicket()
         {
+            if (HttpContext.Current == null)
+                return;
+
             var httpContext = new HttpContextWrapper(HttpContext.Current);
             var log = _logProvider.GetLogger(GetType().Name);
 
