@@ -1,4 +1,4 @@
-# Rhetos release notes
+# WindowsAuthImpersonation release notes
 
 ## 1.2.0 (2019-09-09)
 
