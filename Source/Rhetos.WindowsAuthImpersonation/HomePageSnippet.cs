@@ -37,7 +37,7 @@ namespace Rhetos.WindowsAuthImpersonation
             _snippet = new Lazy<string>(() =>
                 {
                     string filePath = Path.Combine(Paths.ResourcesFolder, "WindowsAuthImpersonation", "HomePageSnippet.html");
-                    return File.ReadAllText(filePath, Encoding.Default);
+                    return File.ReadAllText(filePath);
                 });
         }
 
